@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牛津树绘本单词大冒险</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        /* 欢迎界面 */
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .title {
+            font-size: 3em;
+            color: #fff;
+            text-shadow: 3px 3px 0 #ff6b6b, 6px 6px 0 rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .subtitle {
+            color: #fff;
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .stars-display {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: inline-block;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+        
+        .stars-count {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+        }
+        
+        .stars-label {
+            color: #fff;
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+        
+        .reset-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 0 #c92a2a;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #c92a2a;
+        }
+        
+        .reset-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #c92a2a;
+        }
+        
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .level-card {
+            background: white;
+            border-radius: 25px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            border: 5px solid transparent;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .level-card.completed {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #fff 0%, #fff9e6 100%);
+        }
+        
+        .level-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+        
+        .level-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .level-stars {
+            color: #ffd700;
+            font-size: 1.5em;
+            letter-spacing: 5px;
+        }
+        
+        .level-desc {
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+        
+        /* 游戏界面通用 */
+        .game-screen {
+            display: none;
+            animation: slideIn 0.5s ease;
+            background: rgba(255,255,255,0.95);
+            border-radius: 30px;
+            padding: 30px;
+            min-height: 80vh;
+            position: relative;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .back-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+        
+        .game-title {
+            text-align: center;
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 30px;
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 2px solid #ddd;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        /* 人物游戏 */
+        .character-display {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .character-img {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 8px solid #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: #f0f0f0;
+            transition: transform 0.3s;
+        }
+        
+        .character-img:hover {
+            transform: scale(1.05);
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .option-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            border: 3px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .option-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+        
+        .option-btn.correct {
+            background: #51cf66;
+            border-color: #51cf66;
+            color: white;
+            animation: pulse 0.5s;
+        }
+        
+        .option-btn.wrong {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+            color: white;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .feedback {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 30px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feedback.good {
+            color: #51cf66;
+            animation: popIn 0.5s;
+        }
+        
+        .feedback.try-again {
+            color: #ff6b6b;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 烹饪游戏 */
+        .matching-game {
+            display: flex;
+            justify-content: space-around;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .matching-column {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        .column-title {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .match-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .match-card:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .match-card.selected {
+            border-color: #667eea;
+            background: #e8ecff;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102,126,234,0.3);
+        }
+        
+        .match-card.matched {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s;
+            pointer-events: none;
+        }
+        
+        .match-card.wrong {
+            animation: shake 0.5s;
+            border-color: #ff6b6b;
+            background: #ffe0e0;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        /* 物品游戏 */
+        .item-display {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .item-img {
+            max-width: 400px;
+            max-height: 300px;
+            border-radius: 20px;
+            border: 5px solid #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: white;
+            padding: 10px;
+        }
+        
+        .word-display {
+            font-size: 2.5em;
+            color: #333;
+            margin: 30px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .true-false-buttons {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .tf-btn {
+            padding: 20px 60px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        }
+        
+        .tf-btn.true {
+            background: #51cf66;
+            color: white;
+        }
+        
+        .tf-btn.false {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .tf-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 rgba(0,0,0,0.2);
+        }
+        
+        .tf-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+        }
+        
+        /* 完成画面 */
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+            animation: fadeIn 0.8s;
+        }
+        
+        .star-reward {
+            font-size: 6em;
+            animation: rotate 2s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .completion-text {
+            font-size: 2.5em;
+            color: #667eea;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+        
+        .completion-subtext {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .home-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+        
+        .home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102,126,234,0.5);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .title { font-size: 2em; }
+            .options-grid { grid-template-columns: repeat(2, 1fr); }
+            .matching-game { flex-direction: column; align-items: center; }
+            .character-img, .item-img { width: 200px; height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 欢迎界面 -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1 class="title">🌟 单词大冒险 🌟</h1>
+            <p class="subtitle">和Biff、Chip一起学习英语吧！</p>
+            
+            <div class="stars-display">
+                <div class="stars-count" id="totalStars">⭐ 0</div>
+                <div class="stars-label">累计星星</div>
+                <button class="reset-btn" onclick="resetStars()">🔄 重置星星</button>
+            </div>
+            
+            <div class="levels-grid">
+                <div class="level-card" id="card1" onclick="startGame('characters')">
+                    <div class="level-icon">👨‍👩‍👧‍👦</div>
+                    <div class="level-title">人物</div>
+                    <div class="level-stars">⭐</div>
+                    <div class="level-desc">认识家庭成员<br>难度：简单</div>
+                </div>
+                
+                <div class="level-card" id="card2" onclick="startGame('cooking')">
+                    <div class="level-icon">🍳</div>
+                    <div class="level-title">烹饪</div>
+                    <div class="level-stars">⭐⭐</div>
+                    <div class="level-desc">中英文配对<br>难度：中等</div>
+                </div>
+                
+                <div class="level-card" id="card3" onclick="startGame('items')">
+                    <div class="level-icon">📦</div>
+                    <div class="level-title">物品</div>
+                    <div class="level-stars">⭐⭐</div>
+                    <div class="level-desc">看图判断<br>难度：中等</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 人物游戏界面 -->
+        <div class="game-screen" id="charactersGame">
+            <button class="back-btn" onclick="goHome()">← 返回</button>
+            <h2 class="game-title">👨‍👩‍👧‍👦 认识人物</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="charProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="character-display">
+                <img class="character-img" id="charImg" src="" alt="character">
+            </div>
+            
+            <div class="options-grid" id="charOptions">
+                <button class="option-btn" onclick="checkCharacter('Dad')">Dad</button>
+                <button class="option-btn" onclick="checkCharacter('Mom')">Mom</button>
+                <button class="option-btn" onclick="checkCharacter('Biff')">Biff</button>
+                <button class="option-btn" onclick="checkCharacter('Chip')">Chip</button>
+                <button class="option-btn" onclick="checkCharacter('Kipper')">Kipper</button>
+                <button class="option-btn" onclick="checkCharacter('Floppy')">Floppy</button>
+            </div>
+            
+            <div class="feedback" id="charFeedback"></div>
+            
+            <div class="completion-screen" id="charComplete">
+                <div class="star-reward">⭐</div>
+                <div class="completion-text">太棒了！</div>
+                <div class="completion-subtext">你已经认识所有人物了！</div>
+                <button class="home-btn" onclick="goHome()">返回首页</button>
+            </div>
+        </div>
+        
+        <!-- 烹饪游戏界面 -->
+        <div class="game-screen" id="cookingGame">
+            <button class="back-btn" onclick="goHome()">← 返回</button>
+            <h2 class="game-title">🍳 烹饪配对</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="cookProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="matching-game" id="matchingArea">
+                <div class="matching-column">
+                    <div class="column-title">English</div>
+                    <div id="englishColumn"></div>
+                </div>
+                <div class="matching-column">
+                    <div class="column-title">中文</div>
+                    <div id="chineseColumn"></div>
+                </div>
+            </div>
+            
+            <div class="feedback" id="cookFeedback" style="margin-top: 20px;"></div>
+            
+            <div class="completion-screen" id="cookComplete">
+                <div class="star-reward">⭐⭐</div>
+                <div class="completion-text">完美配对！</div>
+                <div class="completion-subtext">你的记忆力真棒！</div>
+                <button class="home-btn" onclick="goHome()">返回首页</button>
+            </div>
+        </div>
+        
+        <!-- 物品游戏界面 -->
+        <div class="game-screen" id="itemsGame">
+            <button class="back-btn" onclick="goHome()">← 返回</button>
+            <h2 class="game-title">📦 物品判断</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="itemProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="item-display">
+                <img class="item-img" id="itemImg" src="" alt="item">
+            </div>
+            
+            <div class="word-display" id="itemWord"></div>
+            
+            <div class="true-false-buttons">
+                <button class="tf-btn true" onclick="checkItem(true)">✓ 正确</button>
+                <button class="tf-btn false" onclick="checkItem(false)">✗ 错误</button>
+            </div>
+            
+            <div class="feedback" id="itemFeedback"></div>
+            
+            <div class="completion-screen" id="itemComplete">
+                <div class="star-reward">⭐⭐</div>
+                <div class="completion-text">观察力满分！</div>
+                <div class="completion-subtext">所有物品都判断正确了！</div>
+                <button class="home-btn" onclick="goHome()">返回首页</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据
+        const characters = [
+            { name: 'Dad', img: 'images/dad.png' },
+            { name: 'Mom', img: 'images/mom.png' },
+            { name: 'Biff', img: 'images/biff.png' },
+            { name: 'Chip', img: 'images/chip.png' },
+            { name: 'Kipper', img: 'images/kipper.png' },
+            { name: 'Floppy', img: 'images/floppy.png' }
+        ];
+        
+        const cookingData = [
+            { en: 'frying pan', cn: '平底锅', emoji: '🍳' },
+            { en: 'milk', cn: '牛奶', emoji: '🥛' },
+            { en: 'flour', cn: '面粉', emoji: '🌾' },
+            { en: 'egg', cn: '鸡蛋', emoji: '🥚' },
+            { en: 'butter', cn: '黄油', emoji: '🧈' },
+            { en: 'pancake', cn: '煎薄饼', emoji: '🥞' }
+        ];
+        
+        const items = [
+            { name: 'big box', img: 'images/big box.png' },
+            { name: 'little box', img: 'images/little box.png' },
+            { name: 'rug', img: 'images/rug.png' },
+            { name: 'sheet', img: 'images/sheet.png' }
+        ];
+        
+        // 游戏状态
+        let gameState = {
+            stars: 0,
+            completed: { characters: false, cooking: false, items: false },
+            currentCharIndex: 0,
+            charOrder: [],
+            cookMatched: 0,
+            cookSelected: null,
+            itemIndex: 0,
+            itemOrder: [],
+            itemCurrentWord: ''
+        };
+        
+        // 初始化
+        function init() {
+            const saved = localStorage.getItem('oxfordStars');
+            if (saved) {
+                const data = JSON.parse(saved);
+                gameState.stars = data.stars || 0;
+                gameState.completed = data.completed || { characters: false, cooking: false, items: false };
+            }
+            updateStarsDisplay();
+            updateLevelCards();
+        }
+        
+        function updateStarsDisplay() {
+            document.getElementById('totalStars').textContent = '⭐ ' + gameState.stars;
+        }
+        
+        function updateLevelCards() {
+            if (gameState.completed.characters) {
+                document.getElementById('card1').classList.add('completed');
+            }
+            if (gameState.completed.cooking) {
+                document.getElementById('card2').classList.add('completed');
+            }
+            if (gameState.completed.items) {
+                document.getElementById('card3').classList.add('completed');
+            }
+        }
+        
+        function saveProgress() {
+            localStorage.setItem('oxfordStars', JSON.stringify({
+                stars: gameState.stars,
+                completed: gameState.completed
+            }));
+        }
+        
+        function resetStars() {
+            if (confirm('确定要重置所有星星和进度吗？')) {
+                gameState.stars = 0;
+                gameState.completed = { characters: false, cooking: false, items: false };
+                localStorage.removeItem('oxfordStars');
+                updateStarsDisplay();
+                document.querySelectorAll('.level-card').forEach(card => {
+                    card.classList.remove('completed');
+                });
+            }
+        }
+        
+        function startGame(type) {
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById(type + 'Game').style.display = 'block';
+            
+            if (type === 'characters') {
+                initCharactersGame();
+            } else if (type === 'cooking') {
+                initCookingGame();
+            } else if (type === 'items') {
+                initItemsGame();
+            }
+        }
+        
+        function goHome() {
+            document.querySelectorAll('.game-screen').forEach(screen => {
+                screen.style.display = 'none';
+            });
+            document.getElementById('welcomeScreen').style.display = 'block';
+            updateStarsDisplay();
+            updateLevelCards();
+        }
+        
+        // 人物游戏逻辑
+        function initCharactersGame() {
+            gameState.currentCharIndex = 0;
+            gameState.charOrder = [...characters].sort(() => Math.random() - 0.5);
+            document.getElementById('charComplete').style.display = 'none';
+            document.querySelector('.character-display').style.display = 'block';
+            document.querySelector('.options-grid').style.display = 'grid';
+            document.getElementById('charFeedback').textContent = '';
+            showNextCharacter();
+        }
+        
+        function showNextCharacter() {
+            if (gameState.currentCharIndex >= gameState.charOrder.length) {
+                completeCharactersGame();
+                return;
+            }
+            const char = gameState.charOrder[gameState.currentCharIndex];
+            document.getElementById('charImg').src = char.img;
+            document.getElementById('charProgress').style.width = 
+                (gameState.currentCharIndex / gameState.charOrder.length * 100) + '%';
+            
+            // 重置按钮状态
+            document.querySelectorAll('#charOptions .option-btn').forEach(btn => {
+                btn.classList.remove('correct', 'wrong');
+                btn.disabled = false;
+            });
+        }
+        
+        function checkCharacter(name) {
+            const currentChar = gameState.charOrder[gameState.currentCharIndex];
+            const feedback = document.getElementById('charFeedback');
+            const buttons = document.querySelectorAll('#charOptions .option-btn');
+            
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === name) {
+                    if (name === currentChar.name) {
+                        btn.classList.add('correct');
+                    } else {
+                        btn.classList.add('wrong');
+                    }
+                }
+                if (btn.textContent === currentChar.name && name !== currentChar.name) {
+                    btn.classList.add('correct');
+                }
+            });
+            
+            if (name === currentChar.name) {
+                feedback.textContent = 'Good! 🎉';
+                feedback.className = 'feedback good';
+                setTimeout(() => {
+                    gameState.currentCharIndex++;
+                    feedback.textContent = '';
+                    showNextCharacter();
+                }, 1500);
+            } else {
+                feedback.textContent = 'Try again! 😅';
+                feedback.className = 'feedback try-again';
+                setTimeout(() => {
+                    feedback.textContent = '';
+                    showNextCharacter();
+                }, 1500);
+            }
+        }
+        
+        function completeCharactersGame() {
+            document.querySelector('.character-display').style.display = 'none';
+            document.querySelector('.options-grid').style.display = 'none';
+            document.getElementById('charFeedback').style.display = 'none';
+            document.getElementById('charComplete').style.display = 'block';
+            document.getElementById('charProgress').style.width = '100%';
+            
+            if (!gameState.completed.characters) {
+                gameState.stars += 1;
+                gameState.completed.characters = true;
+                saveProgress();
+            }
+        }
+        
+        // 烹饪游戏逻辑
+        function initCookingGame() {
+            gameState.cookMatched = 0;
+            gameState.cookSelected = null;
+            document.getElementById('cookComplete').style.display = 'none';
+            document.getElementById('matchingArea').style.display = 'flex';
+            document.getElementById('cookFeedback').textContent = '';
+            
+            const enColumn = document.getElementById('englishColumn');
+            const cnColumn = document.getElementById('chineseColumn');
+            enColumn.innerHTML = '';
+            cnColumn.innerHTML = '';
+            
+            // 随机排序
+            const enOrder = [...cookingData].sort(() => Math.random() - 0.5);
+            const cnOrder = [...cookingData].sort(() => Math.random() - 0.5);
+            
+            enOrder.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.textContent = item.en;
+                card.dataset.name = item.en;
+                card.dataset.type = 'en';
+                card.onclick = () => selectCookingCard(card, item.en, 'en');
+                enColumn.appendChild(card);
+            });
+            
+            cnOrder.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                card.innerHTML = `<span class="emoji">${item.emoji}</span>${item.cn}`;
+                card.dataset.name = item.en;
+                card.dataset.type = 'cn';
+                card.onclick = () => selectCookingCard(card, item.en, 'cn');
+                cnColumn.appendChild(card);
+            });
+            
+            updateCookProgress();
+        }
+        
+        function selectCookingCard(card, name, type) {
+            const feedback = document.getElementById('cookFeedback');
+            
+            if (card.classList.contains('matched')) return;
+            
+            if (!gameState.cookSelected) {
+                gameState.cookSelected = { card, name, type };
+                card.classList.add('selected');
+            } else {
+                const prev = gameState.cookSelected;
+                
+                if (prev.type === type) {
+                    // 同一边，切换选择
+                    prev.card.classList.remove('selected');
+                    gameState.cookSelected = { card, name, type };
+                    card.classList.add('selected');
+                } else {
+                    // 不同边，检查匹配
+                    if (prev.name === name) {
+                        // 匹配成功
+                        prev.card.classList.remove('selected');
+                        prev.card.classList.add('matched');
+                        card.classList.add('matched');
+                        gameState.cookMatched++;
+                        gameState.cookSelected = null;
+                        feedback.textContent = '配对成功！✨';
+                        feedback.className = 'feedback good';
+                        
+                        updateCookProgress();
+                        
+                        if (gameState.cookMatched >= cookingData.length) {
+                            setTimeout(completeCookingGame, 500);
+                        } else {
+                            setTimeout(() => feedback.textContent = '', 1000);
+                        }
+                    } else {
+                        // 匹配失败，重新开始
+                        prev.card.classList.remove('selected');
+                        prev.card.classList.add('wrong');
+                        card.classList.add('wrong');
+                        feedback.textContent = '错了！重新开始... 😢';
+                        feedback.className = 'feedback try-again';
+                        
+                        setTimeout(() => {
+                            initCookingGame();
+                        }, 1500);
+                    }
+                }
+            }
+        }
+        
+        function updateCookProgress() {
+            const progress = (gameState.cookMatched / cookingData.length) * 100;
+            document.getElementById('cookProgress').style.width = progress + '%';
+        }
+        
+        function completeCookingGame() {
+            document.getElementById('matchingArea').style.display = 'none';
+            document.getElementById('cookFeedback').style.display = 'none';
+            document.getElementById('cookComplete').style.display = 'block';
+            document.getElementById('cookProgress').style.width = '100%';
+            
+            if (!gameState.completed.cooking) {
+                gameState.stars += 2;
+                gameState.completed.cooking = true;
+                saveProgress();
+            }
+        }
+        
+        // 物品游戏逻辑
+        function initItemsGame() {
+            gameState.itemIndex = 0;
+            // 为每个物品生成正确和错误的题目
+            gameState.itemOrder = [];
+            items.forEach(item => {
+                gameState.itemOrder.push({ item, correct: true });
+                // 添加一个错误选项（随机选其他名字）
+                let wrongName;
+                do {
+                    wrongName = items[Math.floor(Math.random() * items.length)].name;
+                } while (wrongName === item.name);
+                gameState.itemOrder.push({ item, correct: false, wrongName });
+            });
+            gameState.itemOrder.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('itemComplete').style.display = 'none';
+            document.querySelector('.item-display').style.display = 'block';
+            document.querySelector('.word-display').style.display = 'block';
+            document.querySelector('.true-false-buttons').style.display = 'flex';
+            document.getElementById('itemFeedback').textContent = '';
+            
+            showNextItem();
+        }
+        
+        function showNextItem() {
+            if (gameState.itemIndex >= gameState.itemOrder.length) {
+                completeItemsGame();
+                return;
+            }
+            
+            const current = gameState.itemOrder[gameState.itemIndex];
+            document.getElementById('itemImg').src = current.item.img;
+            
+            const word = current.correct ? current.item.name : current.wrongName;
+            document.getElementById('itemWord').textContent = word;
+            gameState.itemCurrentWord = word;
+            
+            const progress = (gameState.itemIndex / gameState.itemOrder.length) * 100;
+            document.getElementById('itemProgress').style.width = progress + '%';
+        }
+        
+        function checkItem(isTrue) {
+            const current = gameState.itemOrder[gameState.itemIndex];
+            const isCorrect = current.correct === isTrue;
+            const feedback = document.getElementById('itemFeedback');
+            
+            if (isCorrect) {
+                feedback.textContent = 'Good! 🎉';
+                feedback.className = 'feedback good';
+                gameState.itemIndex++;
+                setTimeout(() => {
+                    feedback.textContent = '';
+                    showNextItem();
+                }, 1000);
+            } else {
+                feedback.textContent = 'Try again! 😅';
+                feedback.className = 'feedback try-again';
+                setTimeout(() => {
+                    feedback.textContent = '';
+                }, 1000);
+            }
+        }
+        
+        function completeItemsGame() {
+            document.querySelector('.item-display').style.display = 'none';
+            document.querySelector('.word-display').style.display = 'none';
+            document.querySelector('.true-false-buttons').style.display = 'none';
+            document.getElementById('itemFeedback').style.display = 'none';
+            document.getElementById('itemComplete').style.display = 'block';
+            document.getElementById('itemProgress').style.width = '100%';
+            
+            if (!gameState.completed.items) {
+                gameState.stars += 2;
+                gameState.completed.items = true;
+                saveProgress();
+            }
+        }
+        
+        // 启动
+        init();
+    </script>
+</body>
+</html>'''
